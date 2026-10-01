@@ -103,8 +103,10 @@ function drawHUD() {
   ctx.textBaseline = 'top';
   ctx.textAlign = 'left';
   ctx.fillText('Puntos: ' + state.score, 16, 12);
-  ctx.textAlign = 'right';
-  ctx.fillText('Vidas: ' + state.lives, W - 16, 12);
+  const size = state.ball.w, gap = 6;
+  for (let i = 0; i < state.lives; i++) {
+    drawSprite(ctx, 'ball', W - 16 - (i + 1) * size - i * gap, 12, size, size);
+  }
 }
 
 function onKey(e, down) {

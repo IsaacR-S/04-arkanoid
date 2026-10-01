@@ -86,16 +86,16 @@ Convenciones:
 
 ## Criterios de aceptación
 
-- [ ] Abrir `index.html` (servido por HTTP) carga el juego sin errores en la consola.
-- [ ] Al cargar se ven el paddle, la bola pegada a él y 42 bloques en 6 filas x 7 columnas, con un color distinto por fila.
-- [ ] ← / A mueven el paddle a la izquierda y → / D a la derecha, sin salirse de los 800 px de ancho.
-- [ ] Espacio lanza la bola solo en la fase `ready`.
-- [ ] La bola rebota en paredes laterales, techo y paddle.
-- [ ] Un impacto en el centro del paddle da una trayectoria vertical, y uno en el borde da ~60° respecto a la vertical.
-- [ ] Romper un bloque suma exactamente 10 puntos y el bloque deja de dibujarse y de colisionar.
-- [ ] Al romper un bloque se reproduce una animación de explosión de 4 frames.
-- [ ] Si la bola cae por debajo del paddle, se pierde una vida y la bola vuelve pegada al paddle.
-- [ ] Con 0 vidas se muestra "Game Over" y los bloques ya no responden.
+- [x] Abrir `index.html` (servido por HTTP) carga el juego sin errores en la consola.
+- [x] Al cargar se ven el paddle, la bola pegada a él y 42 bloques en 6 filas x 7 columnas, con un color distinto por fila.
+- [x] ← / A mueven el paddle a la izquierda y → / D a la derecha, sin salirse de los 800 px de ancho.
+- [x] Espacio lanza la bola solo en la fase `ready`.
+- [x] La bola rebota en paredes laterales, techo y paddle.
+- [x] Un impacto en el centro del paddle da una trayectoria vertical, y uno en el borde da ~60° respecto a la vertical.
+- [x] Romper un bloque suma exactamente 10 puntos y el bloque deja de dibujarse y de colisionar.
+- [x] Al romper un bloque se reproduce una animación de explosión de 4 frames.
+- [x] Si la bola cae por debajo del paddle, se pierde una vida y la bola vuelve pegada al paddle.
+- [x] Con 0 vidas se muestra "Game Over" y los bloques ya no responden.
 - [ ] Al romper los 42 bloques se muestra "Victoria".
 - [ ] Enter en Game Over o Victoria reinicia puntuación, vidas, bloques y bola.
 - [ ] El HUD muestra siempre la puntuación y las vidas restantes.
