@@ -4,6 +4,7 @@ const PADDLE_SPEED = 8;  // px/frame
 const LAUNCH_ANGLE = 30; // grados respecto a la vertical
 const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 const POINTS_PER_BLOCK = 10;
+const LIVES = 3;
 const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
 const BLOCK_W = 32, BLOCK_H = 16;
@@ -15,6 +16,7 @@ const ctx = canvas.getContext('2d');
 const state = {
   phase: 'ready',
   score: 0,
+  lives: LIVES,
   paddle: { x: 0, y: 0, w: 162, h: 14 },
   ball: { x: 0, y: 0, w: 16, h: 16, vx: 0, vy: 0 },
   blocks: [],
@@ -65,6 +67,17 @@ function draw() {
   const { paddle, ball } = state;
   drawSprite(ctx, 'paddle', paddle.x, paddle.y, paddle.w, paddle.h);
   drawSprite(ctx, 'ball', ball.x, ball.y, ball.w, ball.h);
+  drawHUD();
+}
+
+function drawHUD() {
+  ctx.fillStyle = '#fff';
+  ctx.font = '20px monospace';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
+  ctx.fillText('Puntos: ' + state.score, 16, 12);
+  ctx.textAlign = 'right';
+  ctx.fillText('Vidas: ' + state.lives, W - 16, 12);
 }
 
 function onKey(e, down) {
@@ -112,6 +125,18 @@ function updateBall() {
 
   bouncePaddle();
   bounceBlocks();
+
+  if (ball.y > H) loseLife();
+}
+
+function loseLife() {
+  state.lives--;
+  if (state.lives <= 0) {
+    state.phase = 'gameover';
+    return;
+  }
+  state.phase = 'ready';
+  resetBall();
 }
 
 function bounceBlocks() {
