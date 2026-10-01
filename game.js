@@ -1,5 +1,7 @@
 const W = 800, H = 600;
-const PADDLE_SPEED = 8; // px/frame
+const BALL_SPEED = 6;    // px/frame
+const PADDLE_SPEED = 8;  // px/frame
+const LAUNCH_ANGLE = 30; // grados respecto a la vertical
 const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
 const BLOCK_W = 32, BLOCK_H = 16;
@@ -72,10 +74,38 @@ function onKey(e, down) {
     case 'KeyD':
       state.keys.right = down;
       break;
+    case 'Space':
+      if (down && state.phase === 'ready') launchBall();
+      break;
     default:
       return;
   }
   e.preventDefault();
+}
+
+function launchBall() {
+  const angle = LAUNCH_ANGLE * Math.PI / 180;
+  state.ball.vx = BALL_SPEED * Math.sin(angle);
+  state.ball.vy = -BALL_SPEED * Math.cos(angle);
+  state.phase = 'playing';
+}
+
+function updateBall() {
+  const { ball } = state;
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+
+  if (ball.x <= 0) {
+    ball.x = 0;
+    ball.vx = Math.abs(ball.vx);
+  } else if (ball.x + ball.w >= W) {
+    ball.x = W - ball.w;
+    ball.vx = -Math.abs(ball.vx);
+  }
+  if (ball.y <= 0) {
+    ball.y = 0;
+    ball.vy = Math.abs(ball.vy);
+  }
 }
 
 window.addEventListener('keydown', (e) => onKey(e, true));
@@ -88,6 +118,7 @@ function update() {
   paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
 
   if (state.phase === 'ready') resetBall();
+  else if (state.phase === 'playing') updateBall();
 }
 
 function loop() {
