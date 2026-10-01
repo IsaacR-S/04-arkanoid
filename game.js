@@ -20,6 +20,7 @@ const state = {
   paddle: { x: 0, y: 0, w: 162, h: 14 },
   ball: { x: 0, y: 0, w: 16, h: 16, vx: 0, vy: 0 },
   blocks: [],
+  explosions: [],
   keys: { left: false, right: false },
 };
 
@@ -54,6 +55,7 @@ function init() {
   paddle.x = (W - paddle.w) / 2;
   paddle.y = H - 40;
   state.blocks = createBlocks();
+  state.explosions = [];
   resetBall();
 }
 
@@ -64,6 +66,7 @@ function draw() {
   for (const b of state.blocks) {
     if (b.alive) drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
   }
+  drawExplosions();
   const { paddle, ball } = state;
   drawSprite(ctx, 'paddle', paddle.x, paddle.y, paddle.w, paddle.h);
   drawSprite(ctx, 'ball', ball.x, ball.y, ball.w, ball.h);
@@ -83,6 +86,15 @@ function drawEndScreen(title) {
   ctx.font = '22px monospace';
   ctx.fillText('Puntos: ' + state.score, W / 2, H / 2 + 20);
   ctx.fillText('Pulsa Enter para reiniciar', W / 2, H / 2 + 56);
+}
+
+function drawExplosions() {
+  const now = performance.now();
+  for (const ex of state.explosions) {
+    const frames = EXPLOSION_FRAMES[ex.color];
+    const i = Math.floor((now - ex.start) / (EXPLOSION_DURATION / frames.length));
+    if (i < frames.length) drawFrame(ctx, frames[i], ex.x, ex.y, BLOCK_W, BLOCK_H);
+  }
 }
 
 function drawHUD() {
@@ -185,6 +197,7 @@ function bounceBlocks() {
       ball.y += ball.y + ball.h / 2 < b.y + b.h / 2 ? -overlapY : overlapY;
     }
     b.alive = false;
+    state.explosions.push({ x: b.x, y: b.y, color: b.color, start: performance.now() });
     state.score += POINTS_PER_BLOCK;
     return; // un solo bloque por frame
   }
@@ -211,6 +224,9 @@ window.addEventListener('keydown', (e) => onKey(e, true));
 window.addEventListener('keyup', (e) => onKey(e, false));
 
 function update() {
+  const now = performance.now();
+  state.explosions = state.explosions.filter((ex) => now - ex.start < EXPLOSION_DURATION);
+
   const { paddle, keys } = state;
   if (keys.left) paddle.x -= PADDLE_SPEED;
   if (keys.right) paddle.x += PADDLE_SPEED;
