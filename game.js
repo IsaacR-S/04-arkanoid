@@ -2,6 +2,7 @@ const W = 800, H = 600;
 const BALL_SPEED = 6;    // px/frame
 const PADDLE_SPEED = 8;  // px/frame
 const LAUNCH_ANGLE = 30; // grados respecto a la vertical
+const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
 const BLOCK_W = 32, BLOCK_H = 16;
@@ -106,6 +107,25 @@ function updateBall() {
     ball.y = 0;
     ball.vy = Math.abs(ball.vy);
   }
+
+  bouncePaddle();
+}
+
+function bouncePaddle() {
+  const { ball, paddle } = state;
+  const overlaps =
+    ball.vy > 0 &&
+    ball.x + ball.w > paddle.x && ball.x < paddle.x + paddle.w &&
+    ball.y + ball.h >= paddle.y && ball.y + ball.h <= paddle.y + paddle.h + ball.vy;
+  if (!overlaps) return;
+
+  // -1 en el borde izquierdo, 0 en el centro, 1 en el borde derecho
+  const ballCenter = ball.x + ball.w / 2;
+  const offset = (ballCenter - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+  const angle = Math.max(-1, Math.min(1, offset)) * MAX_BOUNCE_ANGLE * Math.PI / 180;
+  ball.vx = BALL_SPEED * Math.sin(angle);
+  ball.vy = -BALL_SPEED * Math.cos(angle);
+  ball.y = paddle.y - ball.h;
 }
 
 window.addEventListener('keydown', (e) => onKey(e, true));
