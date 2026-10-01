@@ -68,6 +68,21 @@ function draw() {
   drawSprite(ctx, 'paddle', paddle.x, paddle.y, paddle.w, paddle.h);
   drawSprite(ctx, 'ball', ball.x, ball.y, ball.w, ball.h);
   drawHUD();
+  if (state.phase === 'gameover') drawEndScreen('Game Over');
+  else if (state.phase === 'won') drawEndScreen('Victoria');
+}
+
+function drawEndScreen(title) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 56px monospace';
+  ctx.fillText(title, W / 2, H / 2 - 30);
+  ctx.font = '22px monospace';
+  ctx.fillText('Puntos: ' + state.score, W / 2, H / 2 + 20);
+  ctx.fillText('Pulsa Enter para reiniciar', W / 2, H / 2 + 56);
 }
 
 function drawHUD() {
@@ -92,6 +107,9 @@ function onKey(e, down) {
       break;
     case 'Space':
       if (down && state.phase === 'ready') launchBall();
+      break;
+    case 'Enter':
+      if (down && (state.phase === 'gameover' || state.phase === 'won')) restart();
       break;
     default:
       return;
@@ -126,7 +144,18 @@ function updateBall() {
   bouncePaddle();
   bounceBlocks();
 
+  if (state.blocks.every((b) => !b.alive)) {
+    state.phase = 'won';
+    return;
+  }
   if (ball.y > H) loseLife();
+}
+
+function restart() {
+  state.score = 0;
+  state.lives = LIVES;
+  state.phase = 'ready';
+  init();
 }
 
 function loseLife() {
