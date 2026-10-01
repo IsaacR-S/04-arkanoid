@@ -3,6 +3,7 @@ const BALL_SPEED = 6;    // px/frame
 const PADDLE_SPEED = 8;  // px/frame
 const LAUNCH_ANGLE = 30; // grados respecto a la vertical
 const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
+const POINTS_PER_BLOCK = 10;
 const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
 const BLOCK_W = 32, BLOCK_H = 16;
@@ -13,6 +14,7 @@ const ctx = canvas.getContext('2d');
 
 const state = {
   phase: 'ready',
+  score: 0,
   paddle: { x: 0, y: 0, w: 162, h: 14 },
   ball: { x: 0, y: 0, w: 16, h: 16, vx: 0, vy: 0 },
   blocks: [],
@@ -109,6 +111,29 @@ function updateBall() {
   }
 
   bouncePaddle();
+  bounceBlocks();
+}
+
+function bounceBlocks() {
+  const { ball } = state;
+  for (const b of state.blocks) {
+    if (!b.alive) continue;
+    const overlapX = Math.min(ball.x + ball.w, b.x + b.w) - Math.max(ball.x, b.x);
+    const overlapY = Math.min(ball.y + ball.h, b.y + b.h) - Math.max(ball.y, b.y);
+    if (overlapX <= 0 || overlapY <= 0) continue;
+
+    // Se invierte la velocidad en el eje de menor penetración
+    if (overlapX < overlapY) {
+      ball.vx = -ball.vx;
+      ball.x += ball.x + ball.w / 2 < b.x + b.w / 2 ? -overlapX : overlapX;
+    } else {
+      ball.vy = -ball.vy;
+      ball.y += ball.y + ball.h / 2 < b.y + b.h / 2 ? -overlapY : overlapY;
+    }
+    b.alive = false;
+    state.score += POINTS_PER_BLOCK;
+    return; // un solo bloque por frame
+  }
 }
 
 function bouncePaddle() {
