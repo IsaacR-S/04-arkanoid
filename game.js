@@ -1,4 +1,5 @@
 const W = 800, H = 600;
+const PADDLE_SPEED = 8; // px/frame
 const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
 const BLOCK_W = 32, BLOCK_H = 16;
@@ -12,6 +13,7 @@ const state = {
   paddle: { x: 0, y: 0, w: 162, h: 14 },
   ball: { x: 0, y: 0, w: 16, h: 16, vx: 0, vy: 0 },
   blocks: [],
+  keys: { left: false, right: false },
 };
 
 function createBlocks() {
@@ -60,7 +62,41 @@ function draw() {
   drawSprite(ctx, 'ball', ball.x, ball.y, ball.w, ball.h);
 }
 
+function onKey(e, down) {
+  switch (e.code) {
+    case 'ArrowLeft':
+    case 'KeyA':
+      state.keys.left = down;
+      break;
+    case 'ArrowRight':
+    case 'KeyD':
+      state.keys.right = down;
+      break;
+    default:
+      return;
+  }
+  e.preventDefault();
+}
+
+window.addEventListener('keydown', (e) => onKey(e, true));
+window.addEventListener('keyup', (e) => onKey(e, false));
+
+function update() {
+  const { paddle, keys } = state;
+  if (keys.left) paddle.x -= PADDLE_SPEED;
+  if (keys.right) paddle.x += PADDLE_SPEED;
+  paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
+
+  if (state.phase === 'ready') resetBall();
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
 loadSpritesheet(() => {
   init();
-  draw();
+  loop();
 });
