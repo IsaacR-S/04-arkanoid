@@ -1,6 +1,6 @@
 # SPEC 03 — Sonidos y niveles
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 02
 > **Date:** 2026-10-15
 > **Objective:** Añadir los sonidos de rebote y ruptura, tres niveles nuevos (cuatro en total) con avance automático, y un indicador "Nivel N" arriba a la derecha del HUD.

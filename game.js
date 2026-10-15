@@ -5,16 +5,41 @@ const LAUNCH_ANGLE = 30; // grados respecto a la vertical
 const MAX_BOUNCE_ANGLE = 60; // grados respecto a la vertical
 const POINTS_PER_BLOCK = 10;
 const LIVES = 3;
-const BLOCK_ROWS = ['red', 'yellow', 'cyan', 'magenta', 'hotpink', 'green'];
 const BLOCK_COLS = 7;
+// '.' = hueco; una letra = un bloque de ese color
+const LEVEL_COLORS = {
+  r: 'red', y: 'yellow', c: 'cyan', m: 'magenta', h: 'hotpink', g: 'green',
+};
+const LEVELS = [
+  [ // 1
+    'rrrrrrr', 'yyyyyyy', 'ccccccc', 'mmmmmmm', 'hhhhhhh', 'ggggggg',
+  ],
+  [ // 2 — pirámide
+    '...r...', '..yyy..', '.ccccc.', 'mmmmmmm', 'hhhhhhh', 'ggggggg',
+  ],
+  [ // 3 — tablero de ajedrez
+    'r.y.c.m', '.h.g.r.', 'y.c.m.h', '.g.r.y.', 'c.m.h.g', '.r.y.c.',
+  ],
+  [ // 4 — reloj de arena
+    'rrrrrrr', '.yyyyy.', '..ccc..', '...m...', '..hhh..', '.ggggg.', 'yyyyyyy',
+  ],
+];
 const BLOCK_W = 32, BLOCK_H = 16;
 const GRID_Y0 = 80;
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+const SOUND_BOUNCE = new Audio('assets/sounds/ball-bounce.mp3');
+const SOUND_BREAK = new Audio('assets/sounds/break-sound.mp3');
+
+function playSound(sound) {
+  sound.cloneNode().play().catch(() => {});
+}
+
 const state = {
   phase: 'ready',
+  level: 0, // índice en LEVELS
   score: 0,
   lives: LIVES,
   paddle: { x: 0, y: 0, w: 162, h: 14 },
@@ -27,8 +52,10 @@ const state = {
 function createBlocks() {
   const x0 = (W - BLOCK_COLS * BLOCK_W) / 2;
   const blocks = [];
-  BLOCK_ROWS.forEach((color, row) => {
+  LEVELS[state.level].forEach((rowMap, row) => {
     for (let col = 0; col < BLOCK_COLS; col++) {
+      const color = LEVEL_COLORS[rowMap[col]];
+      if (!color) continue;
       blocks.push({
         x: x0 + col * BLOCK_W,
         y: GRID_Y0 + row * BLOCK_H,
@@ -107,6 +134,8 @@ function drawHUD() {
   for (let i = 0; i < state.lives; i++) {
     drawSprite(ctx, 'ball', W - 16 - (i + 1) * size - i * gap, 12, size, size);
   }
+  ctx.textAlign = 'right';
+  ctx.fillText('Nivel ' + (state.level + 1), W - 16, 36);
 }
 
 function onKey(e, down) {
@@ -146,26 +175,37 @@ function updateBall() {
   if (ball.x <= 0) {
     ball.x = 0;
     ball.vx = Math.abs(ball.vx);
+    playSound(SOUND_BOUNCE);
   } else if (ball.x + ball.w >= W) {
     ball.x = W - ball.w;
     ball.vx = -Math.abs(ball.vx);
+    playSound(SOUND_BOUNCE);
   }
   if (ball.y <= 0) {
     ball.y = 0;
     ball.vy = Math.abs(ball.vy);
+    playSound(SOUND_BOUNCE);
   }
 
   bouncePaddle();
   bounceBlocks();
 
   if (state.blocks.every((b) => !b.alive)) {
-    state.phase = 'won';
+    if (state.level < LEVELS.length - 1) {
+      state.level++;
+      state.blocks = createBlocks();
+      state.phase = 'ready';
+      resetBall();
+    } else {
+      state.phase = 'won';
+    }
     return;
   }
   if (ball.y > H) loseLife();
 }
 
 function restart() {
+  state.level = 0;
   state.score = 0;
   state.lives = LIVES;
   state.phase = 'ready';
@@ -201,6 +241,7 @@ function bounceBlocks() {
     b.alive = false;
     state.explosions.push({ x: b.x, y: b.y, color: b.color, start: performance.now() });
     state.score += POINTS_PER_BLOCK;
+    playSound(SOUND_BREAK);
     return; // un solo bloque por frame
   }
 }
@@ -220,6 +261,7 @@ function bouncePaddle() {
   ball.vx = BALL_SPEED * Math.sin(angle);
   ball.vy = -BALL_SPEED * Math.cos(angle);
   ball.y = paddle.y - ball.h;
+  playSound(SOUND_BOUNCE);
 }
 
 window.addEventListener('keydown', (e) => onKey(e, true));
