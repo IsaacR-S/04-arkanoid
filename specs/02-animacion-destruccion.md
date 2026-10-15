@@ -1,6 +1,6 @@
 # SPEC 02 — Animación de destrucción visible
 
-> **Status:** Draft
+> **Status:** Aprobado
 > **Depends on:** SPEC 01
 > **Date:** 2026-10-15
 > **Objective:** Alargar la animación de destrucción de bloques, basada en los frames de `EXPLOSION_FRAMES` del spritesheet, para que se aprecie al romper cada bloque.
